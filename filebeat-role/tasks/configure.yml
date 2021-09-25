@@ -17,3 +17,5 @@
   register: filebeat_setup
   changed_when: false
   until: filebeat_setup is succeeded
+  notify: restart Filebeat
+  

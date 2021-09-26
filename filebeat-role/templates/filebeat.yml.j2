@@ -1,5 +1,11 @@
-output.elasticsearch:
-  hosts: ["http://{{ hostvars['el-instance']['ansible_facts']['default_ipv4']['address'] }}:9200"]
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /var/log/syslog
+    - /var/log/auth.log
+output.logstash:
+  hosts: ["{{ hostvars['f-instance']['ansible_facts']['default_ipv4']['address'] }}:5044"]
 setup.kibana:
   host: "http://{{ hostvars['k-instance']['ansible_facts']['default_ipv4']['address'] }}:5601"
 filebeat.config.modules:

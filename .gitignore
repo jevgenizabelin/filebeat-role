@@ -1,2 +1,3 @@
 filebeat-role/files/*
 files/*
+filebeat-role/molecule/default/files/*

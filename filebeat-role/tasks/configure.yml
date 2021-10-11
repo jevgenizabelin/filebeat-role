@@ -14,12 +14,12 @@
 - name: Setup pipeline module for Logstash
   become: true
   ansible.builtin.shell: filebeat setup --pipelines --modules system
-- name: Load Elasticsearch index template
-  become: true
-  ansible.builtin.shell: filebeat setup --index-management -E output.logstash.enabled=false -E 'output.elasticsearch.hosts=["http://{{ hostvars['el-instance']['ansible_facts']['default_ipv4']['address'] | default('0.0.0.0') }}:9200"]'
-- name: Load Kibana dashboard
-  become: true
-  ansible.builtin.shell: filebeat setup -E output.logstash.enabled=false -E output.elasticsearch.hosts=['http://{{ hostvars['el-instance']['ansible_facts']['default_ipv4']['address'] | default('0.0.0.0') }}:9200'] -E setup.kibana.host=http://{{ hostvars['k-instance']['ansible_facts']['default_ipv4']['address'] | default('0.0.0.0') }}:5601
+#- name: Load Elasticsearch index template
+#  become: true
+#  ansible.builtin.shell: filebeat setup --index-management -E output.logstash.enabled=false -E 'output.elasticsearch.hosts=["http://{{ hostvars['el-instance']['ansible_facts']['default_ipv4']['address'] | default('0.0.0.0') }}:9200"]'
+#- name: Load Kibana dashboard
+#  become: true
+#  ansible.builtin.shell: filebeat setup -E output.logstash.enabled=false -E output.elasticsearch.hosts=['http://{{ hostvars['el-instance']['ansible_facts']['default_ipv4']['address'] | default('0.0.0.0') }}:9200'] -E setup.kibana.host=http://{{ hostvars['k-instance']['ansible_facts']['default_ipv4']['address'] | default('0.0.0.0') }}:5601
   register: filebeat_setup
   changed_when: false
   until: filebeat_setup is succeeded

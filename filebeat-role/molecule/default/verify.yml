@@ -1,0 +1,115 @@
+---
+# This is an example playbook to execute Ansible tests.
+
+- name: Verify ubuntu
+  hosts: ubuntu
+  gather_facts: false
+  tasks:
+  - name: Restart elastic
+    sysvinit:
+      name: elasticsearch
+      state: restarted
+  - name: Wait port 9200
+    wait_for:
+      host: 0.0.0.0
+      port: 9200
+      state: started
+  - name: Restart kibana
+    ansible.builtin.service:
+      name: kibana
+      state: restarted
+  - name: Wait port 5601
+    wait_for:
+      host: 0.0.0.0
+      port: 5601
+  - name: Restart logstash
+    ansible.builtin.service:
+      name: logstash
+      state: restarted
+  - name: Wait port 5044
+    wait_for:
+      host: 0.0.0.0
+      port: 5044
+  - name: Restart filebeat before config
+    ansible.builtin.service:
+      name: filebeat
+      state: restarted
+  - name: Load Elasticsearch index template
+    become: true
+    ansible.builtin.shell: filebeat setup --index-management -E output.logstash.enabled=false -E output.elasticsearch.hosts=["http://0.0.0.0:9200"]
+  - name: Load Kibana dashboard
+    become: true
+    ansible.builtin.shell: filebeat setup -E output.logstash.enabled=false -E output.elasticsearch.hosts=['http://0.0.0.0:9200'] -E setup.kibana.host=http://0.0.0.0:5601
+  - name: Restart filebeat after config
+    ansible.builtin.service:
+      name: filebeat
+      state: restarted
+  - name: Check return code 200
+    uri:
+      url: http://localhost:9200/syslog-logs-2021.10
+
+- name: Verify centos
+  hosts: centos7
+  gather_facts: false
+  tasks:
+  - name: Restart elastic
+    sysvinit:
+      name: elasticsearch
+      state: restarted
+  - name: Wait port 9200
+    wait_for:
+      host: 0.0.0.0
+      port: 9200
+      state: started
+  - name: Restart kibana
+    sysvinit:
+      state: restarted
+      name: kibana
+  - name: Wait port 5601
+    wait_for:
+      host: 0.0.0.0
+      port: 5601
+      state: started
+#  - name: Start logstash
+#    ansible.builtin.shell: /usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/logstash-syslog.conf &
+#  - name: Wait port 5044
+#    wait_for:
+#      host: 0.0.0.0
+#      port: 5044
+#  - name: Wait 2 minutes
+#    wait_for:
+#      timeout: 120 
+#  - name: Copy logstash service to /etc/init.d/
+#    become: true
+#    copy:
+#      src: "files/logstash"
+#      mode: 0755
+#      dest: "/etc/init.d/logstash"
+  - name: Restart logstash
+    sysvinit:
+      name: logstash
+      state: restarted
+  - name: Wait port 5044
+    wait_for:
+      host: 0.0.0.0
+      port: 5044
+      state: started
+  - name: Restart filebeat before config
+    sysvinit:
+      name: filebeat
+      state: restarted
+  - name: Load Elasticsearch index template
+    become: true
+    ansible.builtin.shell: filebeat setup --index-management -E output.logstash.enabled=false -E output.elasticsearch.hosts=["http://0.0.0.0:9200"]
+  - name: Load Kibana dashboard
+    become: true
+    ansible.builtin.shell: filebeat setup -E output.logstash.enabled=false -E output.elasticsearch.hosts=['http://0.0.0.0:9200'] -E setup.kibana.host=http://0.0.0.0:5601
+  - name: Restart filebeat after config
+    sysvinit:
+      name: filebeat
+      state: restarted
+  - name: Check return code 
+    uri:
+      url: http://localhost:9200/syslog-logs-2021.10
+
+

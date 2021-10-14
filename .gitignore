@@ -2,4 +2,4 @@ filebeat-role/files/*
 files/*
 filebeat-role/molecule/default/files/*
 filebeat-role/molecule/light/files/*
-
+default_bak/*
